@@ -32,11 +32,11 @@ Enemy.prototype.render = function() {
 // This class requires an update(), render() and
 // a handleInput() method.
 var Player = function() {
+    // Set default values
+    this.reset();
+    
     // Load the image to this.sprite
     this.sprite = 'images/char-boy.png';
-    // Set the player initial Location
-    this.row = 6; // XXX let's just try 6 for now
-    this.col = 2; // XXX let's just try 2 for now
 }
 
 Player.prototype.update = function() {
@@ -67,6 +67,9 @@ Player.prototype.handleInput = function() {
  * Reset to initial state
  */
 Player.prototype.reset = function() {
+    // Set the player initial Location
+    this.row = 6; // XXX let's just try 6 for now
+    this.col = 2; // XXX let's just try 2 for now
 }
 
 // Now instantiate your objects.
