@@ -1,10 +1,19 @@
 /* Some global variables that might be usefull */
-var rowHeight = 83;
-var colWidth = 101;
-var rowCount = 6;
-var colCount = 5;
-var totalWidth = colCount * colWidth;
 
+// Define dimensions in game
+var colWidth = 101;
+var rowHeight = 83;
+var tileSize = 83;
+var numCols = 5;
+var numRows = 6;
+
+// Define boundaries of game board
+var boundaryLeft = 0;
+var boundaryRight = numCols * colWidth;
+var boundaryTop = 0;
+var boundaryBottom = numRows * tileSize;
+
+// Define initial values
 var initialEnemyCol = 0;
 var initialPlayerCol = 2;
 var initialPlayerRow = 5;
@@ -12,17 +21,16 @@ var minEnemies = 3;
 var maxEnemies = 6;
 var numEnemies = Math.floor((Math.random() * (maxEnemies-minEnemies)) + 0.5) + minEnemies;
 
-console.log("width: " + colWidth + "\nheight: " + rowHeight);
 
 // Enemies our player must avoid
 var Enemy = function() {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
+    // Variables applied to each of our instances go here
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
-    // Set the Enemy initial location
+
+    // Set the enemy's initial values
     this.reset();
 };
 
@@ -32,12 +40,18 @@ Enemy.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
-    // TODO: update the Enemy location
     this.x += dt * this.speed;
-    // TODO: handle collision with the Player
 
-    // reset when Enemy left the canvas
-    if (this.x > totalWidth) {
+    // TODO: handle collision with the Player based on pixels and their
+    // alpha channel
+    if (this.row == player.row && Math.ceil(this.x/colWidth) == player.col) {
+        console.log("Enemy hit player");
+        player.reset();
+    }
+
+
+    // reset when enemy left the canvas
+    if (this.x > boundaryRight) {
         this.reset();
     }
 };
@@ -47,37 +61,37 @@ Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-/*
- * Reset to initial state
- */
+// Reset the enemy to its initial state
 Enemy.prototype.reset = function() {
     this.row = Math.floor((Math.random() * 3) + 1);
+
+    // Set enemy's location based on col/row
     this.x = -colWidth;
     this.y = this.row * rowHeight;
-    // Set the Enemy speed
-    this.speed = (4-this.row) * 110; // XXX let's just try 100 for now
+
+    // Set enemy's speed based on row
+    this.speed = (4-this.row) * 110;
 };
 
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
+
 var Player = function() {
     // Set default values
     this.reset();
+
     // Load the image to this.sprite
     this.sprite = 'images/char-boy.png';
-}
+};
 
 Player.prototype.update = function(dt) {
     // TODO: implement
-}
+};
 
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     // TODO: implement
-}
+};
 
-Player.prototype.handleInput = function() {
+Player.prototype.handleInput = function(key) {
     // TODO: implement
     /*
      * This method should receive user input, allowedKeys (the key which
@@ -90,19 +104,54 @@ Player.prototype.handleInput = function() {
      * If the player reaches the water the game should be reset by
      * moving the player back to the initial locaion
      */
-}
+    console.log("Key pressed: " + key);
+    this.move(key);
+};
 
-/*
- * Reset to initial state
- */
+// Move player by 1 row/col
+Player.prototype.move = function(direction) {
+    if (direction === "left") {
+        if (this.x < colWidth) {
+            console.log("Player not allowed to move off screen");
+        } else {
+            this.col -= 1;
+            this.x -= colWidth;
+        }
+    } else if (direction === "up") {
+        if (this.y < rowHeight) {
+            console.log("Player not allowed to move off screen");
+        } else {
+            this.row -= 1;
+            this.y -= rowHeight;
+        }
+    } else if (direction === "right") {
+        if (this.x >= boundaryRight-colWidth) {
+            console.log("Player not allowed to move off screen");
+        } else {
+            this.col += 1;
+            this.x += colWidth;
+        }
+    } else if (direction === "down") {
+        if (this.y >= boundaryBottom-rowHeight) {
+            console.log("Player not allowed to move off screen");
+        } else {
+            this.row += 1;
+            this.y += rowHeight;
+        }
+    }
+    console.log("Moved to x=" + this.x + " and y=" + this.y);
+};
+
+// Reset the player to its initial state
 Player.prototype.reset = function() {
-    // Set the player initial Location
+    // Set the player's initial col/row
     this.col = initialPlayerCol;
     this.row = initialPlayerRow;
 
+    // Set location based on col/row
     this.x = this.col * colWidth;
     this.y = this.row * rowHeight;
-}
+};
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
