@@ -82,13 +82,17 @@ var Player = function() {
     this.sprite = 'images/char-boy.png';
 };
 
-Player.prototype.update = function(dt) {
+Player.prototype.update = function() {
     // TODO: implement
+    if (this.moved) {
+        this.x = this.col * colWidth;
+        this.y = this.row * rowHeight;
+        this.moved = false;
+    }
 };
 
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-    // TODO: implement
 };
 
 Player.prototype.handleInput = function(key) {
@@ -115,30 +119,27 @@ Player.prototype.move = function(direction) {
             console.log("Player not allowed to move off screen");
         } else {
             this.col -= 1;
-            this.x -= colWidth;
         }
     } else if (direction === "up") {
         if (this.y < rowHeight) {
             console.log("Player not allowed to move off screen");
         } else {
             this.row -= 1;
-            this.y -= rowHeight;
         }
     } else if (direction === "right") {
         if (this.x >= boundaryRight-colWidth) {
             console.log("Player not allowed to move off screen");
         } else {
             this.col += 1;
-            this.x += colWidth;
         }
     } else if (direction === "down") {
         if (this.y >= boundaryBottom-rowHeight) {
             console.log("Player not allowed to move off screen");
         } else {
             this.row += 1;
-            this.y += rowHeight;
         }
     }
+    this.moved = true;
     console.log("Moved to x=" + this.x + " and y=" + this.y);
 };
 
