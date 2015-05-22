@@ -1,3 +1,19 @@
+/* Some global variables that might be usefull */
+var rowHeight = 83;
+var colWidth = 101;
+var rowCount = 6;
+var colCount = 5;
+var totalWidth = colCount * colWidth;
+
+var initialEnemyCol = 0;
+var initialPlayerCol = 2;
+var initialPlayerRow = 5;
+var minEnemies = 3;
+var maxEnemies = 6;
+var numEnemies = Math.floor((Math.random() * (maxEnemies-minEnemies)) + 0.5) + minEnemies;
+
+console.log("width: " + colWidth + "\nheight: " + rowHeight);
+
 // Enemies our player must avoid
 var Enemy = function() {
     // Variables applied to each of our instances go here,
@@ -7,11 +23,8 @@ var Enemy = function() {
     // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
     // Set the Enemy initial location
-    this.row = Math.floor((Math.random() * 3) + 1);
-    this.col = -1;
-    // Set the Enemy speed
-    this.speed = 1; // XXX let's just try 1 for now
-}
+    this.reset();
+};
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
@@ -20,13 +33,30 @@ Enemy.prototype.update = function(dt) {
     // which will ensure the game runs at the same speed for
     // all computers.
     // TODO: update the Enemy location
+    this.x += dt * this.speed;
     // TODO: handle collision with the Player
-}
+
+    // reset when Enemy left the canvas
+    if (this.x > totalWidth) {
+        this.reset();
+    }
+};
 
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-}
+};
+
+/*
+ * Reset to initial state
+ */
+Enemy.prototype.reset = function() {
+    this.row = Math.floor((Math.random() * 3) + 1);
+    this.x = -colWidth;
+    this.y = this.row * rowHeight;
+    // Set the Enemy speed
+    this.speed = (4-this.row) * 110; // XXX let's just try 100 for now
+};
 
 // Now write your own player class
 // This class requires an update(), render() and
@@ -34,12 +64,11 @@ Enemy.prototype.render = function() {
 var Player = function() {
     // Set default values
     this.reset();
-    
     // Load the image to this.sprite
     this.sprite = 'images/char-boy.png';
 }
 
-Player.prototype.update = function() {
+Player.prototype.update = function(dt) {
     // TODO: implement
 }
 
@@ -68,17 +97,22 @@ Player.prototype.handleInput = function() {
  */
 Player.prototype.reset = function() {
     // Set the player initial Location
-    this.row = 6; // XXX let's just try 6 for now
-    this.col = 2; // XXX let's just try 2 for now
+    this.col = initialPlayerCol;
+    this.row = initialPlayerRow;
+
+    this.x = this.col * colWidth;
+    this.y = this.row * rowHeight;
 }
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
 var allEnemies = [];
-for (i=0; i<3; i++) {
+for (i=0; i<numEnemies; i++) {
     allEnemies.push(new Enemy());
 }
+console.log("Amount of enemies created: " + allEnemies.length);
+console.log(numEnemies);
 var player = new Player();
 
 
