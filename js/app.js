@@ -1,5 +1,8 @@
 /* Some global variables that might be usefull */
 
+// Debugging
+var debug = true;
+
 // Define dimensions in game
 var colWidth = 101;
 var rowHeight = 83;
@@ -20,6 +23,7 @@ var initialPlayerRow = 5;
 var minEnemies = 3;
 var maxEnemies = 6;
 var numEnemies = Math.floor((Math.random() * (maxEnemies-minEnemies)) + 0.5) + minEnemies;
+
 
 
 // Enemies our player must avoid
@@ -154,6 +158,29 @@ Player.prototype.reset = function() {
     this.y = this.row * rowHeight;
 };
 
+
+
+// HUD to project game-status (and for debugging)
+var Hud = function() {
+};
+
+Hud.prototype.render = function() {
+    if (debug) {
+        this.drawBoundingBoxes();
+    }
+};
+
+// This will help understanding the behavior of the algorithms by
+// visualizing the data that's being used behind the scenes.
+Hud.prototype.drawBoundingBoxes = function() {
+    // Draw bounding boxes of the entities
+    allEnemies.forEach(function(e) {
+        ctx.strokeRect(e.x, e.y, 101, 170);
+    });
+    ctx.strokeRect(player.x, player.y, 101, 170);
+};
+
+
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
@@ -165,6 +192,7 @@ console.log("Amount of enemies created: " + allEnemies.length);
 console.log(numEnemies);
 var player = new Player();
 
+var hud = new Hud();
 
 
 // This listens for key presses and sends the keys to your
