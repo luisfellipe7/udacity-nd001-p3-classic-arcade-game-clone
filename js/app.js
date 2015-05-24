@@ -1,7 +1,10 @@
 /* Some global variables that might be usefull */
 
-// Debugging
-var debug = true;
+// Settings
+var settings = {
+    debug: true,
+    pause: false
+};
 
 // Define dimensions in game
 var colWidth = 101;
@@ -48,10 +51,12 @@ Enemy.prototype.update = function(dt) {
 
     // TODO: handle collision with the Player based on pixels and their
     // alpha channel
-    if (this.row == player.row && Math.ceil(this.x/colWidth) == player.col) {
-        console.log("Enemy hit player");
-        player.reset();
-    }
+    //if (this.row == player.row && Math.ceil(this.x/colWidth) == player.col) {
+    //    console.log("Enemy hit player");
+    //    if (!settings.debug) {
+    //        player.reset();
+    //    }
+    //}
 
 
     // reset when enemy left the canvas
@@ -69,7 +74,7 @@ Enemy.prototype.render = function() {
 Enemy.prototype.reset = function() {
     this.row = Math.floor((Math.random() * 3) + 1);
 
-    // Set enemy's location based on col/row
+    // Set enemy's location based on column/row
     this.x = -colWidth;
     this.y = this.row * rowHeight;
 
@@ -87,7 +92,7 @@ var Player = function() {
 };
 
 Player.prototype.update = function() {
-    // TODO: implement
+    // Only update coordinates when the player has made a move
     if (this.moved) {
         this.x = this.col * colWidth;
         this.y = this.row * rowHeight;
@@ -99,7 +104,7 @@ Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-Player.prototype.handleInput = function(key) {
+Player.prototype.handleInput = function(keyCode) {
     // TODO: implement
     /*
      * This method should receive user input, allowedKeys (the key which
@@ -112,48 +117,65 @@ Player.prototype.handleInput = function(key) {
      * If the player reaches the water the game should be reset by
      * moving the player back to the initial locaion
      */
-    console.log("Key pressed: " + key);
-    this.move(key);
+    console.log("Key pressed: " + keyCode);
+    switch (keyCode) {
+        case "left":
+            if (this.x < colWidth) {
+                console.log("Player not allowed to move off screen");
+            } else {
+                this.move(keyCode);
+            }
+            break;
+        case "up":
+            if (this.y < rowHeight) {
+                console.log("Player not allowed to move off screen");
+            } else {
+                this.move(keyCode);
+            }
+            break;
+        case "right":
+            if (this.x >= boundaryRight-colWidth) {
+                console.log("Player not allowed to move off screen");
+            } else {
+                this.move(keyCode);
+            }
+            break;
+        case "down":
+            if (this.y >= boundaryBottom-rowHeight) {
+                console.log("Player not allowed to move off screen");
+            } else {
+                this.move(keyCode);
+            }
+            break;
+    }
 };
 
-// Move player by 1 row/col
+// Move player one column/row in the given direction
 Player.prototype.move = function(direction) {
-    if (direction === "left") {
-        if (this.x < colWidth) {
-            console.log("Player not allowed to move off screen");
-        } else {
+    switch (direction) {
+        case "left":
             this.col -= 1;
-        }
-    } else if (direction === "up") {
-        if (this.y < rowHeight) {
-            console.log("Player not allowed to move off screen");
-        } else {
+            break;
+        case "up":
             this.row -= 1;
-        }
-    } else if (direction === "right") {
-        if (this.x >= boundaryRight-colWidth) {
-            console.log("Player not allowed to move off screen");
-        } else {
+            break;
+        case "right":
             this.col += 1;
-        }
-    } else if (direction === "down") {
-        if (this.y >= boundaryBottom-rowHeight) {
-            console.log("Player not allowed to move off screen");
-        } else {
+            break;
+        case "down":
             this.row += 1;
-        }
+            break;
     }
     this.moved = true;
-    console.log("Moved to x=" + this.x + " and y=" + this.y);
 };
 
 // Reset the player to its initial state
 Player.prototype.reset = function() {
-    // Set the player's initial col/row
+    // Set the player's initial column/row
     this.col = initialPlayerCol;
     this.row = initialPlayerRow;
 
-    // Set location based on col/row
+    // Set location based on column/row
     this.x = this.col * colWidth;
     this.y = this.row * rowHeight;
 };
@@ -165,7 +187,7 @@ var Hud = function() {
 };
 
 Hud.prototype.render = function() {
-    if (debug) {
+    if (settings.debug) {
         this.drawBoundingBoxes();
     }
 };
@@ -199,11 +221,36 @@ var hud = new Hud();
 // Player.handleInput() method. You don't need to modify this.
 document.addEventListener('keyup', function(e) {
     var allowedKeys = {
-        37: 'left',
-        38: 'up',
-        39: 'right',
-        40: 'down'
+        27: 'esc',   // Escape (reset)
+        37: 'left',  // ArrowLeft
+        38: 'up',    // ArrowUp
+        39: 'right', // ArrowRight
+        40: 'down',  // ArrowDown
+        68: 'd',     // Debug
+        80: 'p'      // Pause
     };
 
-    player.handleInput(allowedKeys[e.keyCode]);
+    console.log("pressed: " + e.keyCode);
+
+    switch (allowedKeys[e.keyCode]) {
+        case 'esc':
+            player.reset();
+            break;
+        case 'd':
+            settings.debug = !settings.debug;
+            console.log("debug: " + (settings.debug ? "on" : "off") );
+            break;
+        case 'p':
+            settings.pause = !settings.pause;
+            console.log( (settings.pause ? "paused" : "resumed") );
+            break;
+        default:
+            if (!settings.pause) {
+                player.handleInput(allowedKeys[e.keyCode]);
+            }
+    }
+
+    if (settings.pause && settings.debug) {
+        debugger;
+    }
 });
