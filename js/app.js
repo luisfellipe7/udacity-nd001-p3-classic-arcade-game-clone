@@ -3,7 +3,12 @@
 // Settings
 var settings = {
     debug: true,
-    pause: false
+    pause: false,
+    colors: {
+        0: "green",  // harmless  (not on player's line)
+        1: "orange", // dangerous (on player's line, not colliding)
+        2: "red"     // colliding (on player's line and colliding)
+    }
 };
 
 // Define dimensions in game
@@ -12,6 +17,8 @@ var rowHeight = 83;
 var tileSize = 83;
 var numCols = 5;
 var numRows = 6;
+var entityWidth = 101;
+var entityHeight = 170;
 
 // Define boundaries of game board
 var boundaryLeft = 0;
@@ -33,6 +40,11 @@ var numEnemies = Math.floor((Math.random() * (maxEnemies-minEnemies)) + 0.5) + m
 var Enemy = function() {
     // Variables applied to each of our instances go here
 
+
+    // Set dimensions
+    this.width = entityWidth;
+    this.height = entityHeight;
+
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
@@ -44,19 +56,10 @@ var Enemy = function() {
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
 Enemy.prototype.update = function(dt) {
-    // You should multiply any movement by the dt parameter
-    // which will ensure the game runs at the same speed for
-    // all computers.
-    this.x += dt * this.speed;
-
-    // TODO: handle collision with the Player based on pixels and their
-    // alpha channel
-    //if (this.row == player.row && Math.ceil(this.x/colWidth) == player.col) {
-    //    console.log("Enemy hit player");
-    //    if (!settings.debug) {
-    //        player.reset();
-    //    }
-    //}
+    // Multiply any movement by the dt parameter and round the
+    // result to an integer, which will ensure the game runs at the same
+    // speed for all computers and the pixels are aligned at the grid.
+    this.x += (dt * this.speed) | 0;
 
 
     // reset when enemy left the canvas
@@ -80,12 +83,18 @@ Enemy.prototype.reset = function() {
 
     // Set enemy's speed based on row
     this.speed = (4-this.row) * 110;
+
+    this.state = 0;
 };
 
 
 var Player = function() {
     // Set default values
     this.reset();
+
+    // Set dimensions
+    this.width = entityWidth;
+    this.height = entityHeight;
 
     // Load the image to this.sprite
     this.sprite = 'images/char-boy.png';
@@ -117,33 +126,24 @@ Player.prototype.handleInput = function(keyCode) {
      * If the player reaches the water the game should be reset by
      * moving the player back to the initial locaion
      */
-    console.log("Key pressed: " + keyCode);
     switch (keyCode) {
         case "left":
-            if (this.x < colWidth) {
-                console.log("Player not allowed to move off screen");
-            } else {
+            if (this.x >= colWidth) {
                 this.move(keyCode);
             }
             break;
         case "up":
-            if (this.y < rowHeight) {
-                console.log("Player not allowed to move off screen");
-            } else {
+            if (this.y >= rowHeight) {
                 this.move(keyCode);
             }
             break;
         case "right":
-            if (this.x >= boundaryRight-colWidth) {
-                console.log("Player not allowed to move off screen");
-            } else {
+            if (this.x < boundaryRight-colWidth) {
                 this.move(keyCode);
             }
             break;
         case "down":
-            if (this.y >= boundaryBottom-rowHeight) {
-                console.log("Player not allowed to move off screen");
-            } else {
+            if (this.y < boundaryBottom-rowHeight) {
                 this.move(keyCode);
             }
             break;
@@ -178,17 +178,21 @@ Player.prototype.reset = function() {
     // Set location based on column/row
     this.x = this.col * colWidth;
     this.y = this.row * rowHeight;
+
+    this.state = 0;
 };
 
 
 
 // HUD to project game-status (and for debugging)
 var Hud = function() {
+    this.intersections = [];
 };
 
 Hud.prototype.render = function() {
     if (settings.debug) {
         this.drawBoundingBoxes();
+        this.drawIntersections();
     }
 };
 
@@ -196,10 +200,25 @@ Hud.prototype.render = function() {
 // visualizing the data that's being used behind the scenes.
 Hud.prototype.drawBoundingBoxes = function() {
     // Draw bounding boxes of the entities
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 1;
+
     allEnemies.forEach(function(e) {
+        ctx.strokeStyle = settings.colors[e.state];
         ctx.strokeRect(e.x, e.y, 101, 170);
     });
+    ctx.strokeStyle = "black";
     ctx.strokeRect(player.x, player.y, 101, 170);
+};
+
+Hud.prototype.drawIntersections = function() {
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 5;
+
+    while (this.intersections.length > 0) {
+        var box = this.intersections.shift();
+        ctx.strokeRect(box.x, box.y, box.width, box.height);
+    }
 };
 
 
@@ -210,8 +229,6 @@ var allEnemies = [];
 for (i=0; i<numEnemies; i++) {
     allEnemies.push(new Enemy());
 }
-console.log("Amount of enemies created: " + allEnemies.length);
-console.log(numEnemies);
 var player = new Player();
 
 var hud = new Hud();
@@ -229,8 +246,6 @@ document.addEventListener('keyup', function(e) {
         68: 'd',     // Debug
         80: 'p'      // Pause
     };
-
-    console.log("pressed: " + e.keyCode);
 
     switch (allowedKeys[e.keyCode]) {
         case 'esc':

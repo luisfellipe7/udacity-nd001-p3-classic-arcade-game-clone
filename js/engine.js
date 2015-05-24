@@ -79,8 +79,10 @@ var Engine = (function(global) {
      * on the entities themselves within your app.js file).
      */
     function update(dt) {
-        updateEntities(dt);
-        // checkCollisions();
+        if (!settings.pause) {
+            updateEntities(dt);
+            checkCollisions();
+        }
     }
 
     /* This is called by the update function  and loops through all of the
@@ -96,6 +98,57 @@ var Engine = (function(global) {
         });
         player.update();
     }
+
+    /* This is called by the update function and checks all enemy
+     * objects for collisions with the player. Collision detection will
+     * be done in steps:
+     * 1. check which enemies are on the same row as the player
+     * 2. filter out enemies with overlapping bounding boxes
+     * 3. calculate intersection of those overlaps
+     * 4. check those intersections for overlapping pixels (with
+     *    non-zero alpha channel)
+     */
+    function checkCollisions() {
+        // First filter out the enemies on the same row as the player to
+        // avoid expensive calculations
+        allEnemies.forEach(function(enemy, index) {
+            enemy.state = 0;
+            if (enemy.y === player.y) {
+                // Enemy is on the same row
+                enemy.state = 1;
+                if (enemy.x + 101 < player.x) {
+                    // bounding box of the enemy is left of the player
+                } else if (enemy.x > player.x + 101) {
+                    // bounding box of the enemy is right of the player
+                } else {
+                    // Enemies bounding box is overlapping
+                    enemy.state = 2;
+                    var intersection = getIntersection(enemy, player);
+                    hud.intersections.push(intersection);
+
+                    // TODO: Check for pixel-based collision
+                }
+            }
+        });
+    }
+
+    function getIntersection(entityA, entityB) {
+        // Calculating intersection
+        var box = {
+            x: Math.max(entityA.x, entityB.x),
+            width: Math.min(entityA.x+101, entityB.x+101) - Math.max(entityA.x, entityB.x),
+            // Entities have the same y-position and height
+            y: entityA.y,
+            height: entityHeight
+        };
+        return box;
+    }
+
+    function getPixelCollision() {
+        // TODO: implement
+    }
+
+
 
     /* This function initially draws the "game level", it will then call
      * the renderEntities function. Remember, this function is called every
@@ -138,6 +191,7 @@ var Engine = (function(global) {
 
 
         renderEntities();
+        hud.render();
     }
 
     /* This function is called by the render function and is called on each game
