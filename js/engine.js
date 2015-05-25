@@ -101,12 +101,11 @@ var Engine = (function(global) {
 
     /* This is called by the update function and checks all enemy
      * objects for collisions with the player. Collision detection will
-     * be done in steps:
+     * be done in steps to reduce unneeded calculations:
      * 1. check which enemies are on the same row as the player
      * 2. filter out enemies with overlapping bounding boxes
      * 3. calculate intersection of those overlaps
-     * 4. check those intersections for overlapping pixels (with
-     *    non-zero alpha channel)
+     * 4. check those intersections for overlapping pixels
      */
     function checkCollisions() {
         // First filter out the enemies on the same row as the player to
@@ -117,16 +116,19 @@ var Engine = (function(global) {
                 // Enemy is on the same row
                 enemy.state = 1;
                 if (enemy.x + 101 < player.x) {
-                    // bounding box of the enemy is left of the player
+                    // Bounding box of the enemy is left of the player
                 } else if (enemy.x > player.x + 101) {
-                    // bounding box of the enemy is right of the player
+                    // Bounding box of the enemy is right of the player
                 } else {
                     // Enemies bounding box is overlapping
                     enemy.state = 2;
                     var intersection = getIntersection(enemy, player);
                     hud.intersections.push(intersection);
 
-                    // TODO: Check for pixel-based collision
+                    if (isPixelCollision(enemy, player)) {
+                        console.log("Collision between player and enemy");
+                        player.reset();
+                    }
                 }
             }
         });
@@ -144,8 +146,16 @@ var Engine = (function(global) {
         return box;
     }
 
-    function getPixelCollision() {
-        // TODO: implement
+    function isPixelCollision(enemy, player) {
+        // For now, just use an easy calculation based on the knowledge
+        // I have of the sprites of the enemy and the player.
+        if ( ((enemy.x+entityWidth+3) > (player.x+18)) &&
+           ((enemy.x-3) < (player.x+entityWidth-18)) ) {
+            return true;
+        }
+        // TODO: implement with real pixel data in the sprites of both
+        // entitites, by comparing the alpha channels of pixels from
+        // both sprites in the intersection.
     }
 
 

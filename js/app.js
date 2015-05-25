@@ -2,7 +2,7 @@
 
 // Settings
 var settings = {
-    debug: true,
+    debug: false,
     pause: false,
     colors: {
         0: "green",  // harmless  (not on player's line)
