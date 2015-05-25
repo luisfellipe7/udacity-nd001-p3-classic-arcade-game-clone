@@ -111,17 +111,17 @@ var Engine = (function(global) {
         // First filter out the enemies on the same row as the player to
         // avoid expensive calculations
         allEnemies.forEach(function(enemy, index) {
-            enemy.state = 0;
+            enemy.threatLevel = 0;
             if (enemy.y === player.y) {
                 // Enemy is on the same row
-                enemy.state = 1;
+                enemy.threatLevel = 1;
                 if (enemy.x + 101 < player.x) {
                     // Bounding box of the enemy is left of the player
                 } else if (enemy.x > player.x + 101) {
                     // Bounding box of the enemy is right of the player
                 } else {
                     // Enemies bounding box is overlapping
-                    enemy.state = 2;
+                    enemy.threatLevel = 2;
                     var intersection = getIntersection(enemy, player);
                     hud.intersections.push(intersection);
 

@@ -8,6 +8,15 @@ var settings = {
         0: "green",  // harmless  (not on player's line)
         1: "orange", // dangerous (on player's line, not colliding)
         2: "red"     // colliding (on player's line and colliding)
+    },
+    rows: {
+        water: [0],
+        stone: [1,2,3],
+        grass: [4,5]
+    },
+    board: {
+        numRows: 6,
+        numCols: 5
     }
 };
 
@@ -37,8 +46,10 @@ var numEnemies = Math.floor((Math.random() * (maxEnemies-minEnemies)) + 0.5) + m
 
 
 // Enemies our player must avoid
-var Enemy = function() {
+var Enemy = function(id) {
+    this.id = id;
     // Variables applied to each of our instances go here
+    this.isMoving = false;
 
 
     // Set dimensions
@@ -84,7 +95,7 @@ Enemy.prototype.reset = function() {
     // Set enemy's speed based on row
     this.speed = (4-this.row) * 110;
 
-    this.state = 0;
+    this.threatLevel = 0;
 };
 
 
@@ -118,17 +129,12 @@ Player.prototype.render = function() {
 };
 
 Player.prototype.handleInput = function(keyCode) {
-    // TODO: implement
     /*
-     * This method should receive user input, allowedKeys (the key which
-     * was pressed) and move the player according to that input.
-     * Left key should move the player to the left.
-     * Right key should move the player to the right.
-     * Up key should move the player up
-     * Down key should move the player down
+     * This method should receive user input and initiate a player-move
+     * according to that input, as long as its a legal move.
      * The player cannot move off screen
      * If the player reaches the water the game should be reset by
-     * moving the player back to the initial locaion
+     * moving the player back to the initial location
      */
     switch (keyCode) {
         case "left":
@@ -208,7 +214,7 @@ Hud.prototype.drawBoundingBoxes = function() {
     ctx.lineWidth = 1;
 
     allEnemies.forEach(function(e) {
-        ctx.strokeStyle = settings.colors[e.state];
+        ctx.strokeStyle = settings.colors[e.threatLevel];
         ctx.strokeRect(e.x, e.y, 101, 170);
     });
     ctx.strokeStyle = "black";
@@ -231,7 +237,7 @@ Hud.prototype.drawIntersections = function() {
 // Place the player object in a variable called player
 var allEnemies = [];
 for (i=0; i<numEnemies; i++) {
-    allEnemies.push(new Enemy());
+    allEnemies.push(new Enemy(i));
 }
 var player = new Player();
 
