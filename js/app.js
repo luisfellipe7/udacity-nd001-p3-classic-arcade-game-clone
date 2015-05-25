@@ -107,6 +107,10 @@ Player.prototype.update = function() {
         this.y = this.row * rowHeight;
         this.moved = false;
     }
+    if (this.y === 0) {
+        console.log("Player has reached the water!");
+        this.reset();
+    }
 };
 
 Player.prototype.render = function() {
