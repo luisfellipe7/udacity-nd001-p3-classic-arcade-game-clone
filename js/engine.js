@@ -138,7 +138,8 @@ var Engine = (function(global) {
         // Calculating intersection
         var box = {
             x: Math.max(entityA.x, entityB.x),
-            width: Math.min(entityA.x+101, entityB.x+101) - Math.max(entityA.x, entityB.x),
+            width: Math.min(entityA.x+101, entityB.x+101)
+                    - Math.max(entityA.x, entityB.x),
             // Entities have the same y-position and height
             y: entityA.y,
             height: entityHeight
