@@ -10,11 +10,13 @@ criteria.
 The reference that has been of great help to me was the [JavaScript
 documentation at the Mozilla Developer Network](https://developer.mozilla.org/en-US/docs/Web/JavaScript).
 
-## Extra
+## Some Extra's
 
-For collision detection I've implemented a procedure to have
-pixel-perfect precise collision detection. This is based on the alpha
-channels in the sprites.
+* The enemies at least keep one tile distance of each other
+* There will be no more than three enemies on a row at the same time
+* For collision detection I've implemented a procedure to have
+pixel-precise collision detection. This is based on the alpha channels
+in the sprites.
 
 ## The Game
 
@@ -28,14 +30,9 @@ You can try the game at the [GitHub Page](http://swesterveld.github.io/udacity-n
 
 ### Controls
 
-The player can be moved with the arrow keys:
-* ***Arrow Up***: move forward
-* ***Arrow Down***: move backwards
-* ***Arrow Left***: move to the left
-* ***Arrow Right***: move to the right
-
-* The game can be paused (and resumed) with ***P***
-* A visual debug mode can be toggled on and off with ***D***
+* The player can be moved with the ***arrow keys***
+* The game can be paused (and resumed) with the ***P-key***
+* A visual debug mode can be toggled on and off with the ***D-key***
 
 When the game is both on pause and in visual debug mode, the JavaScript
 debugger will be activated.
