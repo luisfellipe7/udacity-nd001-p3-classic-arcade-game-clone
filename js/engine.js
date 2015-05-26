@@ -196,8 +196,6 @@ var Engine = (function(global) {
         return false;
     }
 
-
-
     /* This function initially draws the "game level", it will then call
      * the renderEntities function. Remember, this function is called every
      * game tick (or loop of the game engine) because that's how games work -
@@ -237,7 +235,6 @@ var Engine = (function(global) {
                         col * 101, row * 83);
             }
         }
-
 
         renderEntities();
         hud.render();

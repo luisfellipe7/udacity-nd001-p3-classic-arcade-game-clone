@@ -36,9 +36,6 @@ var maxEnemies = 6;
 var numEnemies = Math.floor((Math.random() * (maxEnemies-minEnemies)) + 
                  0.5) + minEnemies;
 
-
-
-
 // Enemies our player must avoid
 var Enemy = function(id) {
     this.id = id;
@@ -122,7 +119,6 @@ Enemy.prototype.spawn = function() {
         this.isMoving = true;
     }
 };
-
 
 var Player = function() {
     // Set default values
@@ -217,8 +213,6 @@ Player.prototype.reset = function() {
     this.state = 0;
 };
 
-
-
 // HUD to project game-status (and for debugging)
 var Hud = function() {
     this.intersections = [];
@@ -256,7 +250,6 @@ Hud.prototype.drawIntersections = function() {
     }
 };
 
-
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
@@ -267,7 +260,6 @@ for (var i=0; i<numEnemies; i++) {
 var player = new Player();
 
 var hud = new Hud();
-
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
