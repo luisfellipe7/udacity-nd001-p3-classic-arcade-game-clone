@@ -93,7 +93,6 @@ Enemy.prototype.reset = function() {
     this.isMoving = false;
 
     this.row = Math.floor((Math.random() * 3) + 1);
-    console.log("enemy " + this.id + ": reset to row " + this.row);
 
     // Set enemy's location based on column/row
     this.x = -colWidth;
