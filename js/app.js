@@ -25,19 +25,17 @@ var spawnMax = 3;
 var spawnDistance = colWidth;
 
 // Define boundaries of game board
-var boundaryLeft = 0;
 var boundaryRight = numCols * colWidth;
-var boundaryTop = 0;
 var boundaryBottom = numRows * tileSize;
 
 // Define initial values
-var initialEnemyCol = 0;
 var initialPlayerCol = 2;
 var initialPlayerRow = 5;
 var minEnemies = 3;
 var maxEnemies = 6;
-var numEnemies = Math.floor((Math.random() * (maxEnemies-minEnemies))
-                    + 0.5) + minEnemies;
+var numEnemies = Math.floor((Math.random() * (maxEnemies-minEnemies)) + 
+                 0.5) + minEnemies;
+
 
 
 
@@ -65,7 +63,7 @@ Enemy.prototype.update = function(dt) {
     // result to an integer, which will ensure the game runs at the same
     // speed for all computers and the pixels are aligned at the grid.
     if (this.isMoving) {
-        this.x += (dt * this.speed) | 0;
+        this.x = Math.round(this.x+(dt * this.speed));
 
         // reset when enemy left the canvas
         if (this.x > boundaryRight) {
@@ -107,9 +105,9 @@ Enemy.prototype.spawn = function() {
     var spawnedOnSameRow = 0;
     for (var enemy=0; enemy<allEnemies.length; enemy++) {
         // Check all other enemies moving on the same row and count them
-        if ((allEnemies[enemy].id != this.id)
-            && (allEnemies[enemy].row == this.row
-            && allEnemies[enemy].isMoving)) {
+        if ((allEnemies[enemy].id != this.id) &&
+            (allEnemies[enemy].row == this.row &&
+            allEnemies[enemy].isMoving)) {
 
             if (allEnemies[enemy].x < 0 + spawnDistance) {
                 // Not enough space, so no further checking needed
@@ -263,7 +261,7 @@ Hud.prototype.drawIntersections = function() {
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
 var allEnemies = [];
-for (i=0; i<numEnemies; i++) {
+for (var i=0; i<numEnemies; i++) {
     allEnemies.push(new Enemy(i));
 }
 var player = new Player();
@@ -300,9 +298,5 @@ document.addEventListener('keyup', function(e) {
             if (!settings.pause) {
                 player.handleInput(allowedKeys[e.keyCode]);
             }
-    }
-
-    if (settings.pause && settings.debug) {
-        debugger;
     }
 });

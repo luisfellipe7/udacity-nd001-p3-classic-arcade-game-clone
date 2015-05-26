@@ -124,7 +124,7 @@ var Engine = (function(global) {
     function checkCollisions() {
         // First filter out the enemies on the same row as the player to
         // avoid expensive calculations
-        allEnemies.forEach(function(enemy, index) {
+        allEnemies.forEach(function(enemy) {
             enemy.threatLevel = 0; // Enemy is harmless
             if (enemy.y === player.y) {
                 enemy.threatLevel = 1; // Enemy is on the same row
@@ -151,11 +151,11 @@ var Engine = (function(global) {
         // Calculating intersection
         var box = {
             x: Math.max(entityA.x, entityB.x),
-            width: Math.min(entityA.x+101, entityB.x+101)
-                    - Math.max(entityA.x, entityB.x),
+            width: Math.min(entityA.x+101, entityB.x+101) -
+                    Math.max(entityA.x, entityB.x),
             // Entities have the same y-position and height
             y: entityA.y,
-            height: entityHeight
+            height: entityA.height
         };
         return box;
     }
@@ -166,19 +166,20 @@ var Engine = (function(global) {
         // to 0. In that particular case there would be a collision.
 
         // Get ImageData objects of player and enemy
+        var playerPixels, enemyPixels;
         if (enemy.x < player.x) {
             // Enemy is on the left
-            var playerPixels = ctxPlayer.getImageData(
+            playerPixels = ctxPlayer.getImageData(
                     0, 0, intersection.width, intersection.height);
-            var enemyPixels = ctxEnemy.getImageData(
+            enemyPixels = ctxEnemy.getImageData(
                     enemy.width-intersection.width, 0,
                     intersection.width, intersection.height);
         } else {
             // Enemy is on the right
-            var playerPixels = ctxPlayer.getImageData(
+            playerPixels = ctxPlayer.getImageData(
                     player.width-intersection.width, 0,
                     intersection.width, intersection.height);
-            var enemyPixels = ctxEnemy.getImageData(0, 0,
+            enemyPixels = ctxEnemy.getImageData(0, 0,
                     intersection.width, intersection.height);
         }
 
@@ -186,11 +187,10 @@ var Engine = (function(global) {
             for (var y=0; y<intersection.height; y++) {
                 // The pixel actual check; if pixel from both sprites is
                 // not transparant, the collision has happened.
-                if (playerPixels.data[(y*intersection.width+x)*4+3]!=0
-                    && enemyPixels.data[(y*intersection.width+x)*4+3]!=0) {
+                if (playerPixels.data[(y*intersection.width+x)*4+3]!==0 &&
+                    enemyPixels.data[(y*intersection.width+x)*4+3]!==0) {
                     return true;
                 }
-
             }
         }
         return false;
