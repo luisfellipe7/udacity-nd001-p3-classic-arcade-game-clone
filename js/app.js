@@ -23,6 +23,8 @@ var settings = {
 // Define dimensions in game
 var colWidth = 101;
 var rowHeight = 83;
+var spawnMax = 3;
+var spawnDistance = colWidth;
 var tileSize = 83;
 var numCols = 5;
 var numRows = 6;
@@ -41,7 +43,8 @@ var initialPlayerCol = 2;
 var initialPlayerRow = 5;
 var minEnemies = 3;
 var maxEnemies = 6;
-var numEnemies = Math.floor((Math.random() * (maxEnemies-minEnemies)) + 0.5) + minEnemies;
+var numEnemies = Math.floor((Math.random() * (maxEnemies-minEnemies))
+                    + 0.5) + minEnemies;
 
 
 
@@ -49,8 +52,6 @@ var numEnemies = Math.floor((Math.random() * (maxEnemies-minEnemies)) + 0.5) + m
 var Enemy = function(id) {
     this.id = id;
     // Variables applied to each of our instances go here
-    this.isMoving = false;
-
 
     // Set dimensions
     this.width = entityWidth;
@@ -70,12 +71,15 @@ Enemy.prototype.update = function(dt) {
     // Multiply any movement by the dt parameter and round the
     // result to an integer, which will ensure the game runs at the same
     // speed for all computers and the pixels are aligned at the grid.
-    this.x += (dt * this.speed) | 0;
+    if (this.isMoving) {
+        this.x += (dt * this.speed) | 0;
 
-
-    // reset when enemy left the canvas
-    if (this.x > boundaryRight) {
-        this.reset();
+        // reset when enemy left the canvas
+        if (this.x > boundaryRight) {
+            this.reset();
+        }
+    } else {
+        this.spawn();
     }
 };
 
@@ -86,7 +90,10 @@ Enemy.prototype.render = function() {
 
 // Reset the enemy to its initial state
 Enemy.prototype.reset = function() {
+    this.isMoving = false;
+
     this.row = Math.floor((Math.random() * 3) + 1);
+    console.log("enemy " + this.id + ": reset to row " + this.row);
 
     // Set enemy's location based on column/row
     this.x = -colWidth;
@@ -97,6 +104,34 @@ Enemy.prototype.reset = function() {
 
     this.threatLevel = 0;
 };
+
+// Try to spawn the enemy on its row, keeping in mind that spawning is
+// only possible when:
+//  1. the maximum amount of moving enemies (spawnMax) on the same row
+//  hasn't been reached yet.
+//  2. the minimum distance to its predecessor (spawnDistance) is free
+// When spawning is not possible, the enemy will be put on hold.
+Enemy.prototype.spawn = function() {
+    var spawnedOnSameRow = 0;
+    for (var enemy=0; enemy<allEnemies.length; enemy++) {
+        // Check all other enemies moving on the same row and count them
+        if ((allEnemies[enemy].id != this.id)
+            && (allEnemies[enemy].row == this.row
+            && allEnemies[enemy].isMoving)) {
+
+            if (allEnemies[enemy].x < 0 + spawnDistance) {
+                // Not enough space, so no further checking needed
+                return;
+            }
+            // Count enemies already spawned on the same row
+            spawnedOnSameRow++;
+        }
+    }
+    // Only spawn when maximum amount of enemies hasn't been reached yet
+    if (spawnedOnSameRow < spawnMax) {
+        this.isMoving = true;
+    }
+}
 
 
 var Player = function() {
