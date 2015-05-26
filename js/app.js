@@ -8,28 +8,21 @@ var settings = {
         0: "green",  // harmless  (not on player's line)
         1: "orange", // dangerous (on player's line, not colliding)
         2: "red"     // colliding (on player's line and colliding)
-    },
-    rows: {
-        water: [0],
-        stone: [1,2,3],
-        grass: [4,5]
-    },
-    board: {
-        numRows: 6,
-        numCols: 5
     }
 };
 
 // Define dimensions in game
 var colWidth = 101;
 var rowHeight = 83;
-var spawnMax = 3;
-var spawnDistance = colWidth;
 var tileSize = 83;
 var numCols = 5;
 var numRows = 6;
 var entityWidth = 101;
 var entityHeight = 170;
+
+// Maximum spawned entities in a row and the minimal distance inbetween
+var spawnMax = 3;
+var spawnDistance = colWidth;
 
 // Define boundaries of game board
 var boundaryLeft = 0;
@@ -130,7 +123,7 @@ Enemy.prototype.spawn = function() {
     if (spawnedOnSameRow < spawnMax) {
         this.isMoving = true;
     }
-}
+};
 
 
 var Player = function() {
@@ -152,8 +145,10 @@ Player.prototype.update = function() {
         this.y = this.row * rowHeight;
         this.moved = false;
     }
+    // If the player reaches the water the game should be reset by
+    // moving the player back to the initial location
     if (this.y === 0) {
-        console.log("Player has reached the water!");
+        console.log("Player has reached the water! WINNING!!");
         this.reset();
     }
 };
@@ -167,8 +162,6 @@ Player.prototype.handleInput = function(keyCode) {
      * This method should receive user input and initiate a player-move
      * according to that input, as long as its a legal move.
      * The player cannot move off screen
-     * If the player reaches the water the game should be reset by
-     * moving the player back to the initial location
      */
     switch (keyCode) {
         case "left":

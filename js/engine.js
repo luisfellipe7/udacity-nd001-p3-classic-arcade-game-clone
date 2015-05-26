@@ -63,7 +63,7 @@ var Engine = (function(global) {
          * function again as soon as the browser is able to draw another frame.
          */
         win.requestAnimationFrame(main);
-    };
+    }
 
     /* This function does some initial setup that should only occur once,
      * particularly setting the lastTime variable that is required for the
@@ -125,10 +125,9 @@ var Engine = (function(global) {
         // First filter out the enemies on the same row as the player to
         // avoid expensive calculations
         allEnemies.forEach(function(enemy, index) {
-            enemy.threatLevel = 0;
+            enemy.threatLevel = 0; // Enemy is harmless
             if (enemy.y === player.y) {
-                // Enemy is on the same row
-                enemy.threatLevel = 1;
+                enemy.threatLevel = 1; // Enemy is on the same row
                 if (enemy.x + 101 <= player.x) {
                     // Bounding box of the enemy is left of the player
                 } else if (enemy.x >= player.x + 101) {
@@ -140,7 +139,7 @@ var Engine = (function(global) {
                     hud.intersections.push(intersection);
 
                     if (isPixelCollision(enemy, player, intersection)) {
-                        //console.log("Collision between player and enemy");
+                        console.log("Player has been hit by an enemy!");
                         player.reset();
                     }
                 }
@@ -234,7 +233,8 @@ var Engine = (function(global) {
                  * so that we get the benefits of caching these images, since
                  * we're using them over and over.
                  */
-                ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
+                ctx.drawImage(Resources.get(rowImages[row]),
+                        col * 101, row * 83);
             }
         }
 
