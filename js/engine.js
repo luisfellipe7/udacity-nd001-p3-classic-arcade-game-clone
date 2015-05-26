@@ -29,6 +29,12 @@ var Engine = (function(global) {
     canvas.height = 606;
     doc.body.appendChild(canvas);
 
+    // Prepare helper-contexts for pixel-based collision detections
+    var canvasPlayer = doc.createElement('canvas'),
+        ctxPlayer = canvasPlayer.getContext('2d');
+    var canvasEnemy = doc.createElement('canvas'),
+        ctxEnemy = canvasEnemy.getContext('2d');
+
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
      */
@@ -67,6 +73,14 @@ var Engine = (function(global) {
         reset();
         lastTime = Date.now();
         main();
+
+        drawHelperContexts();
+    }
+
+    function drawHelperContexts() {
+        // Put entities on contexts for pixel-based collision detection
+        ctxPlayer.drawImage(Resources.get(player.sprite), 0, 0);
+        ctxEnemy.drawImage(Resources.get(allEnemies[0].sprite), 0, 0);
     }
 
     /* This function is called by main (our game loop) and itself calls all
@@ -115,9 +129,9 @@ var Engine = (function(global) {
             if (enemy.y === player.y) {
                 // Enemy is on the same row
                 enemy.threatLevel = 1;
-                if (enemy.x + 101 < player.x) {
+                if (enemy.x + 101 <= player.x) {
                     // Bounding box of the enemy is left of the player
-                } else if (enemy.x > player.x + 101) {
+                } else if (enemy.x >= player.x + 101) {
                     // Bounding box of the enemy is right of the player
                 } else {
                     // Enemies bounding box is overlapping
@@ -125,8 +139,8 @@ var Engine = (function(global) {
                     var intersection = getIntersection(enemy, player);
                     hud.intersections.push(intersection);
 
-                    if (isPixelCollision(enemy, player)) {
-                        console.log("Collision between player and enemy");
+                    if (isPixelCollision(enemy, player, intersection)) {
+                        //console.log("Collision between player and enemy");
                         player.reset();
                     }
                 }
@@ -147,16 +161,40 @@ var Engine = (function(global) {
         return box;
     }
 
-    function isPixelCollision(enemy, player) {
-        // For now, just use an easy calculation based on the knowledge
-        // I have of the sprites of the enemy and the player.
-        if ( ((enemy.x+entityWidth+3) > (player.x+18)) &&
-           ((enemy.x-3) < (player.x+entityWidth-18)) ) {
-            return true;
+    function isPixelCollision(enemy, player, intersection) {
+        // If bounding boxes are intersecting, check the overlapping
+        // pixels from both sprites for alpha channel values not equal
+        // to 0. In that particular case there would be a collision.
+
+        // Get ImageData objects of player and enemy
+        if (enemy.x < player.x) {
+            // Enemy is on the left
+            var playerPixels = ctxPlayer.getImageData(
+                    0, 0, intersection.width, intersection.height);
+            var enemyPixels = ctxEnemy.getImageData(
+                    enemy.width-intersection.width, 0,
+                    intersection.width, intersection.height);
+        } else {
+            // Enemy is on the right
+            var playerPixels = ctxPlayer.getImageData(
+                    player.width-intersection.width, 0,
+                    intersection.width, intersection.height);
+            var enemyPixels = ctxEnemy.getImageData(0, 0,
+                    intersection.width, intersection.height);
         }
-        // TODO: implement with real pixel data in the sprites of both
-        // entitites, by comparing the alpha channels of pixels from
-        // both sprites in the intersection.
+
+        for (var x=0; x<intersection.width; x++) {
+            for (var y=0; y<intersection.height; y++) {
+                // The pixel actual check; if pixel from both sprites is
+                // not transparant, the collision has happened.
+                if (playerPixels.data[(y*intersection.width+x)*4+3]!=0
+                    && enemyPixels.data[(y*intersection.width+x)*4+3]!=0) {
+                    return true;
+                }
+
+            }
+        }
+        return false;
     }
 
 
